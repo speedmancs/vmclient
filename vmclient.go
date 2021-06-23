@@ -24,11 +24,31 @@ func getRespond(client *http.Client, req *http.Request) {
 
 func DeleteVM(url string, id string) {
 	client := &http.Client{}
-	fmt.Println(fmt.Sprintf("%s/vm/%s", url, id))
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s/vm/%s", url, id), nil)
 	if err != nil {
 		fmt.Print(err.Error())
 	}
+	getRespond(client, req)
+}
+
+func GetVM(url string, id string) {
+	client := &http.Client{}
+	req, err := http.NewRequest("GET", fmt.Sprintf("%s/vm/%s", url, id), nil)
+	if err != nil {
+		fmt.Print(err.Error())
+	}
+	getRespond(client, req)
+}
+
+func UpdateVM(url string, id string, name string, status string) {
+	client := &http.Client{}
+	var jsonStr = []byte(fmt.Sprintf(`{"name":"%s", "status":"%s"}`, name, status))
+
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%s/vm/%s", url, id), bytes.NewBuffer(jsonStr))
+	if err != nil {
+		fmt.Print(err.Error())
+	}
+	req.Header.Set("Content-Type", "application/json")
 	getRespond(client, req)
 
 }
@@ -43,13 +63,11 @@ func GetAllVM(url string) {
 
 func RegisterVM(url string, name string, status string) {
 	client := &http.Client{}
-	var jsonStr = []byte(
-		fmt.Sprintf(`{"name":"%s", "status":"%s"}`, name, status))
+	var jsonStr = []byte(fmt.Sprintf(`{"name":"%s", "status":"%s"}`, name, status))
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s/vm", url), bytes.NewBuffer(jsonStr))
 	if err != nil {
 		fmt.Print(err.Error())
-		return
 	}
 	req.Header.Set("Content-Type", "application/json")
 	getRespond(client, req)
@@ -69,12 +87,15 @@ func main() {
 
 	flag.Parse()
 
-	fmt.Println(cmd)
 	if cmd == "getall" {
 		GetAllVM(url)
 	} else if cmd == "register" {
 		RegisterVM(url, name, status)
 	} else if cmd == "delete" {
 		DeleteVM(url, id)
+	} else if cmd == "get" {
+		GetVM(url, id)
+	} else if cmd == "update" {
+		UpdateVM(url, id, name, status)
 	}
 }
